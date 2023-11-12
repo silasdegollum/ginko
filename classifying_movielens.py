@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov  9 14:52:43 2023
+Created on Tue Nov  7 12:52:43 2023
 
 @author: nivinebenjamin
 """
@@ -11,8 +11,13 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 from sklearn.model_selection import train_test_split
 
+#deze werkt niet, er is waarschijnlijk iets aan de hand met de decoding 
 df = pd.read_csv('u.item')
 df.head(30)
+names=['movie id', 'movie title', 'release date', 'video release date', 'IMDB URL', 
+                 #         'unknown', 'Action', 'Adventure', 'Animation', 'Childrens', 'Comedy', 'Crime', 
+                  #        'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 
+                   #       'Romance', 'Sci_Fi', 'Thriller', 'War', 'Western'], header=None)
 
 #datacleaning 
 
