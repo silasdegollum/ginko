@@ -6,6 +6,8 @@ Created on Tues Nov  7 14:12:04 2023
 @author: nivinebenjamin
 recommendation system based on ratings 
 """
+#in ditt script wordt de volgende fout aangegeven: 
+ValueError: You are trying to merge on int64 and object columns. If you wish to proceed you should use pd.concat
 
 import pandas as pd
 import numpy as np 
