@@ -18,12 +18,22 @@ genres = movies['genres'].str.split('|', expand=True)              #Deze split d
 dummies = pd.get_dummies(genres[0])                                #Deze tovert het weer om in alle genres en binair of een film ze bezit
 del movies['genres']
 movies = pd.concat([movies, dummies], axis=1)                      #Dit voegt de kolommen bij de eerste dataset
-#movies = movies.set_index('movieId')       Dit moet voor nu even uit staan, anders klopt de lookup niet.
-
+movies[['title', 'year']] = movies['title'].str.extract(r'(.+) \((\d{4})\)')    #extraheert publicatiejaar uit de filmnaam
+movies['year'] = movies['year'].dropna().astype(int)
+movies = movies.set_index('movieId')
 
 #rating data inladen
 rating = pd.read_csv(r"C:\Users\silas\Documents\HU\5Minor\Periode 2\Data\ml-25m\ml-25m\ratings.csv").astype(float)
 rating[['userId', 'movieId', 'timestamp']] = rating[['userId', 'movieId', 'timestamp']].astype(int)
+
+#gemiddelde rating berekenen en bij de movie dataset gooien
+avg_rating = rating.groupby('movieId')['rating'].mean()
+avg_rating.index = avg_rating.index.astype(int)
+num_ratings = rating.groupby('movieId')['rating'].count().rename('num_ratings')
+movies = pd.concat([movies, avg_rating], axis=1) 
+movies = pd.concat([movies, num_ratings], axis=1) 
+movies = movies.reset_index()                                       #index moet weer gereset worden voor de lookuptabel
+movies = movies.dropna()                                            #er is een heel aantal films zonder rating
 
 #Een kleinere dataset maken en deze in een pivot table zetten
 rating_klein = rating[rating['movieId']<=200]
@@ -33,6 +43,7 @@ matrix = rating_klein.pivot_table(values='rating', index='movieId', columns='use
 """
 Hier begint de code voor het aanbevelen. Dit heb ik niet zelf geschreven, maar komt van deze website:
     https://towardsdatascience.com/item-based-collaborative-filtering-in-python-91f747200fab
+    Ik heb er wel het een en adner in aangepast.
 """
 
 #variabelendefinitie
@@ -119,37 +130,40 @@ for m,t in list(enumerate(matrix.index)):
 
 
 
-def recommend_movies(user, num_recommended_movies):
+#Ik dit onderdeel uit de functie gehaald omdat je dan wel te zien krijgt wat variabalen zijn
+print(f'The list of the Movies user {user_name} Has Watched \n')                
 
-  print('The list of the Movies user {user} Has Watched \n')
-
-  for m in matrix[matrix[user] > 0][user].index.tolist():
-    print(m)
+for m in matrix[matrix[user_name] > 0][user_name].index.tolist():
+    m_titel = movies[movies['movieId']==m]['title'].to_string(index=False)      #om niet alleen een ID maar ook filmnaam weer te geven
+    print(m_titel)
   
-  print('\n')
+print('\n')
 
-  recommended_movies = []
+recommended_movies = []
 
-  for m in matrix[matrix[user] == 0].index.tolist():
-
+for m in matrix[matrix[user_name] == 0].index.tolist():                         #hier voeg je iteratief alle eigenschappen van de film toe
+    m_titel = movies[movies['movieId']==m]['title'].to_string(index=False)      
+    m_jaartal = movies[movies['movieId']==m]['year'].to_string(index=False)
+    m_avg_rating = movies[movies['movieId']==m]['rating'].to_string(index=False)
+    m_num_ratings = movies[movies['movieId']==m]['num_ratings'].to_string(index=False)
+ #   m_genres = movies[movies['movieId']==m]['title'].to_string(index=False)
     index_matrix = matrix.index.tolist().index(m)
-    predicted_rating = matrix1.iloc[index_matrix, matrix1.columns.tolist().index(user)]
-    recommended_movies.append((m, predicted_rating))
+    predicted_rating = matrix1.iloc[index_matrix, matrix1.columns.tolist().index(user_name)]
+    recommended_movies.append((m_titel, m_jaartal, predicted_rating, m_avg_rating, m_num_ratings))  #stop ze in een lijst
 
-  sorted_rm = sorted(recommended_movies, key=lambda x:x[1], reverse=True)
+sorted_rm = sorted(recommended_movies, key=lambda x:x[2], reverse=True)         #deze sorteert bovengenoemde lijst op predicted rating (derde nummer in tuple)
   
-  print('The list of the Recommended Movies \n')
-  rank = 1
-  for recommended_movie in sorted_rm[:num_recommended_movies]:
+print('The list of the Recommended Movies \n')
+rank = 1
+for recommended_movie in sorted_rm[:number_neighbors]:                      #print voor het aantal aanbevolen films de informatie
     
-    print(f'{rank}: {recommended_movie[0]} - predicted rating: {recommended_movie[1]}')
+    print(f' {rank}: {recommended_movie[0]} \n '
+          f'year: {recommended_movie[1]} \n'
+          f' predicted rating: {recommended_movie[2]} \n'
+          f' average rating: {recommended_movie[3]} \n'
+          f' number of ratings: {recommended_movie[4]}')
+    print('\n')
     rank = rank + 1
-
-
-
-
-
-
 
 
 
