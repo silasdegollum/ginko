@@ -27,9 +27,13 @@ rating = pd.read_csv(r"C:\Users\silas\Documents\HU\5Minor\Periode 2\Data\ml-25m\
 #gemiddelde rating berekenen
 avg_rating = rating.groupby('movieId')['rating'].mean()
 avg_rating.index = avg_rating.index.astype(int)
+num_ratings = rating.groupby('movieId')['rating'].count().rename('num_ratings')
+
 
 #dataframes even groot maken, is nodig voor het model zometeen. Ze worden ook gelijk gecombineerd in een df dat result heet.
-result = pd.concat([movies, avg_rating], axis=1).reindex(avg_rating.index)
+
+
+result = pd.concat([movies, avg_rating, num_ratings], axis=1).reindex(avg_rating.index)
 
 #Hier stel ik twee variabelen in voor de gebruiker.
 aantal_buren = 2

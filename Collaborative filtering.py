@@ -28,15 +28,14 @@ rating = pd.read_csv(r"C:\Users\silas\Documents\HU\5Minor\Periode 2\Data\ml-25m\
 rating[['userId', 'movieId', 'timestamp']] = rating[['userId', 'movieId', 'timestamp']].astype(int)
 
 #Een kleinere dataset maken en deze in een pivot table zetten
-rating_klein = rating[rating['movieId']<=100]
+rating_klein = rating[rating['movieId']<=200]
 matrix = rating_klein.pivot_table(values='rating', index='movieId', columns='userId', fill_value=0)
 
 
 
 #De inputs voor het programma. Je moet een indexnummer invoegen
 movie_to_select = int(input('What movie do you want to compare to?'))
-amount_of_recommendations = int(input('How many movies do you want?'))
-amount_of_recommendations = amount_of_recommendations+1                 #Dit moet omdat de nearest neigbor de film zelf is.
+amount_of_recommendations = 5+1                 #Dit moet omdat de nearest neigbor de film zelf is. Hij raadt dus 5 films aan.
 
 from sklearn.neighbors import NearestNeighbors
 knn = NearestNeighbors(metric='cosine', algorithm='brute')
