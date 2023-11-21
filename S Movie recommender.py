@@ -16,7 +16,7 @@ from sklearn.neighbors import NearestNeighbors
 movies = pd.read_csv(r"C:\Users\silas\Documents\HU\5Minor\Periode 2\Data\ml-25m\ml-25m\movies.csv")
 genres = movies['genres'].str.split('|', expand=True)              #Deze split de genres in hun eigen deel
 dummies = pd.get_dummies(genres[0])                                #Deze tovert het weer om in alle genres en binair of een film ze bezit
-del movies['genres']
+movies['genres'] = movies['genres'].str.split('|')
 movies = pd.concat([movies, dummies], axis=1)                      #Dit voegt de kolommen bij de eerste dataset
 movies[['title', 'year']] = movies['title'].str.extract(r'(.+) \((\d{4})\)')    #extraheert publicatiejaar uit de filmnaam
 movies['year'] = movies['year'].dropna().astype(int)
@@ -47,7 +47,7 @@ Hier begint de code voor het aanbevelen. Dit heb ik niet zelf geschreven, maar k
 """
 
 #variabelendefinitie
-number_neighbors = 5+1                 #Dit moet omdat de nearest neigbor de film zelf is. Hij raadt dus 5 films aan.
+number_neighbors = 6
 user_name = 2
 
 
@@ -146,10 +146,10 @@ for m in matrix[matrix[user_name] == 0].index.tolist():                         
     m_jaartal = movies[movies['movieId']==m]['year'].to_string(index=False)
     m_avg_rating = movies[movies['movieId']==m]['rating'].to_string(index=False)
     m_num_ratings = movies[movies['movieId']==m]['num_ratings'].to_string(index=False)
- #   m_genres = movies[movies['movieId']==m]['title'].to_string(index=False)
+    m_genres = movies[movies['movieId']==m]['genres'].to_string(index=False)        #geeft nog steeds als een list weer, niet zo mooi.
     index_matrix = matrix.index.tolist().index(m)
     predicted_rating = matrix1.iloc[index_matrix, matrix1.columns.tolist().index(user_name)]
-    recommended_movies.append((m_titel, m_jaartal, predicted_rating, m_avg_rating, m_num_ratings))  #stop ze in een lijst
+    recommended_movies.append((m_titel, m_jaartal, predicted_rating, m_avg_rating, m_num_ratings, m_genres))  #stop ze in een lijst
 
 sorted_rm = sorted(recommended_movies, key=lambda x:x[2], reverse=True)         #deze sorteert bovengenoemde lijst op predicted rating (derde nummer in tuple)
   
@@ -161,12 +161,10 @@ for recommended_movie in sorted_rm[:number_neighbors]:                      #pri
           f'year: {recommended_movie[1]} \n'
           f' predicted rating: {recommended_movie[2]} \n'
           f' average rating: {recommended_movie[3]} \n'
-          f' number of ratings: {recommended_movie[4]}')
+          f' number of ratings: {recommended_movie[4]} \n'
+          f' genres: {recommended_movie[5]}')
     print('\n')
     rank = rank + 1
-
-
-
 
 
 
