@@ -31,3 +31,7 @@ search_result = tags[tags['tag'].str.contains(film_input, regex=False, case=Fals
 
 search_group = search_result.groupby('movieId')['tag'].count()
 print(search_group['tag']>0)
+
+import streamlit as st
+st.title("Zoek een film")
+    
